@@ -19,12 +19,40 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+MONGO_URL = os.environ.get("MONGO_URL")
+if not MONGO_URL:
+    raise RuntimeError("MONGO_URL not set in environment")
+
+client = AsyncIOMotorClient(MONGO_URL)
+DB_NAME = os.getenv("DB_NAME", "cabmatch")
+db = client[DB_NAME]
+
+# ---- App + CORS (single place) ----
+def _parse_origins() -> List[str]:
+    # Prefer CORS_ORIGINS (comma-separated), else FRONTEND_ORIGIN, else "*"
+    cors_env = os.getenv("CORS_ORIGINS")
+    if cors_env:
+        return [o.strip() for o in cors_env.split(",") if o.strip()]
+    fo = os.getenv("FRONTEND_ORIGIN")
+    if fo and fo != "*":
+        return [fo]
+    return ["*"]
 
 # Create the main app without a prefix
 app = FastAPI()
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "*")
+origins = _parse_origins()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins if origins != ["*"] else ["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/health")
+def health():
+    return {"ok": True, "service": "cab-match-backend"}
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -142,12 +170,14 @@ class PricingEstimate(BaseModel):
     per_km_rate: float
     surge_factor: float
     estimated_fare: float
+
 # NEW: explicit request bodies
 class LoginRequest(BaseModel):
     phone: str
 
 class DriverStatusUpdate(BaseModel):
     status: DriverStatus
+
 # Helper Functions
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate the great circle distance between two points on earth in kilometers"""
@@ -237,8 +267,9 @@ async def register_driver(driver_data: DriverCreate):
         token=token
     )
 
-@api_router.post("/auth/login")
-async def login(phone: str):
+@api_router.post("/auth/login", response_model=AuthResponse)
+async def login(payload: LoginRequest):
+    phone = payload.phone
     # Check if user exists as rider
     rider = await db.riders.find_one({"phone": phone})
     if rider:
@@ -282,16 +313,17 @@ async def update_driver_location(driver_id: str, location_update: LocationUpdate
     return {"message": "Location updated successfully"}
 
 @api_router.put("/drivers/{driver_id}/status")
-async def update_driver_status(driver_id: str, status: DriverStatus):
+async def update_driver_status(driver_id: str, body: DriverStatusUpdate):
+    # DELETE any query-param usage like: status: str = Query(...)
+    # MODIFY the update to use body.status.value
     result = await db.drivers.update_one(
         {"id": driver_id},
-        {
-            "$set": {
-                "status": status.value,
-                "last_update": datetime.now(timezone.utc).isoformat()
-            }
-        }
+        {"$set": {
+            "status": body.status.value,
+            "last_update": datetime.now(timezone.utc).isoformat()
+        }}
     )
+
     
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Driver not found")
@@ -361,6 +393,7 @@ async def match_driver(trip_id: str):
         }
     }).to_list(10)
     
+    
     if nearby_drivers:
         # Select closest driver
         best_driver = nearby_drivers[0]
@@ -395,6 +428,13 @@ async def match_driver(trip_id: str):
             "trip_id": trip_id,
             "trip": trip
         })
+
+@app.on_event("startup")
+async def ensure_indexes():
+    await db.riders.create_index("id", unique=True)
+    await db.drivers.create_index("id", unique=True)
+    await db.trips.create_index("id", unique=True)
+    await db.drivers.create_index([("location", "2dsphere")])  # for $near
 
 @api_router.put("/trips/{trip_id}/start")
 async def start_trip(trip_id: str):
@@ -553,14 +593,6 @@ async def websocket_driver(websocket: WebSocket, driver_id: str):
 # Include the router in the main app
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -571,3 +603,8 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
