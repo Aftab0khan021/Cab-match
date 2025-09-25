@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Body
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -142,7 +142,12 @@ class PricingEstimate(BaseModel):
     per_km_rate: float
     surge_factor: float
     estimated_fare: float
+# NEW: explicit request bodies
+class LoginRequest(BaseModel):
+    phone: str
 
+class DriverStatusUpdate(BaseModel):
+    status: DriverStatus
 # Helper Functions
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate the great circle distance between two points on earth in kilometers"""
