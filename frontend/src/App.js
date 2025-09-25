@@ -654,7 +654,7 @@ const RiderDashboard = ({ user, onLogout }) => {
                         <div>
                           <p className="font-semibold text-gray-700 mb-1">Estimated Fare</p>
                           <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Route className="w-4 h-4" />
+                            <Navigation className="w-4 h-4" />
                             <span>{fareEstimate.distance_km.toFixed(1)} km</span>
                             {fareEstimate.surge_factor > 1 && (
                               <>
