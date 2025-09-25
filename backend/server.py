@@ -499,27 +499,15 @@ async def estimate_fare(pickup_lat: float, pickup_lon: float, dropoff_lat: float
     per_km_rate = 15.0
     
     # Calculate demand/supply for surge pricing
-    # Count recent trip requests in area (last 5 minutes)
+    # Count recent trip requests in area (last 5 minutes) - simplified for MVP
     five_min_ago = datetime.now(timezone.utc) - timedelta(minutes=5)
     demand = await db.trips.count_documents({
-        "requested_at": {"$gte": five_min_ago.isoformat()},
-        "pickup.coordinates": {
-            "$near": {
-                "$geometry": {"type": "Point", "coordinates": [pickup_lon, pickup_lat]},
-                "$maxDistance": 5000  # 5km radius
-            }
-        }
+        "requested_at": {"$gte": five_min_ago.isoformat()}
     })
     
-    # Count available drivers in area
+    # Count available drivers in area - simplified for MVP
     supply = await db.drivers.count_documents({
-        "status": "available",
-        "location": {
-            "$near": {
-                "$geometry": {"type": "Point", "coordinates": [pickup_lon, pickup_lat]},
-                "$maxDistance": 5000
-            }
-        }
+        "status": "available"
     })
     
     surge_factor = calculate_surge_factor(demand, supply)
