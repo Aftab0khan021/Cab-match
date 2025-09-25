@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Body
+from fastapi import FastAPI, APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Body, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -268,28 +268,21 @@ async def register_driver(driver_data: DriverCreate):
     )
 
 @api_router.post("/auth/login", response_model=AuthResponse)
-async def login(payload: LoginRequest):
-    phone = payload.phone
-    # Check if user exists as rider
+async def login(payload: LoginRequest = Body(None), phone_q: str = Query(None)):
+    phone = (payload.phone if payload and payload.phone else phone_q)
+    if not phone:
+        raise HTTPException(status_code=422, detail="phone is required")
+
     rider = await db.riders.find_one({"phone": phone})
     if rider:
         token = f"rider_{rider['id']}"
-        return AuthResponse(
-            user_id=rider['id'],
-            user_type="rider",
-            token=token
-        )
-    
-    # Check if user exists as driver
+        return AuthResponse(user_id=rider['id'], user_type="rider", token=token)
+
     driver = await db.drivers.find_one({"phone": phone})
     if driver:
         token = f"driver_{driver['id']}"
-        return AuthResponse(
-            user_id=driver['id'],
-            user_type="driver",
-            token=token
-        )
-    
+        return AuthResponse(user_id=driver['id'], user_type="driver", token=token)
+
     raise HTTPException(status_code=404, detail="User not found")
 
 # Driver Routes
@@ -313,21 +306,21 @@ async def update_driver_location(driver_id: str, location_update: LocationUpdate
     return {"message": "Location updated successfully"}
 
 @api_router.put("/drivers/{driver_id}/status")
-async def update_driver_status(driver_id: str, body: DriverStatusUpdate):
-    # DELETE any query-param usage like: status: str = Query(...)
-    # MODIFY the update to use body.status.value
+async def update_driver_status(driver_id: str,
+                               body: DriverStatusUpdate = Body(None),
+                               status_q: DriverStatus = Query(None)):
+    new_status = (body.status if body and body.status else status_q)
+    if not new_status:
+        raise HTTPException(status_code=422, detail="status is required")
     result = await db.drivers.update_one(
         {"id": driver_id},
         {"$set": {
-            "status": body.status.value,
+            "status": new_status.value if isinstance(new_status, DriverStatus) else str(new_status),
             "last_update": datetime.now(timezone.utc).isoformat()
         }}
     )
-
-    
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Driver not found")
-    
     return {"message": "Status updated successfully"}
 
 @api_router.get("/drivers/{driver_id}", response_model=Driver)
