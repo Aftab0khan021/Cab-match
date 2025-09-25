@@ -40,14 +40,9 @@ def _parse_origins() -> List[str]:
 
 # Create the main app without a prefix
 app = FastAPI()
-ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://cab-match-79nqtpswn-aftab-pathans-projects-9c06d6e7.vercel.app",  # your prod FE
-]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=_parse_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=False
