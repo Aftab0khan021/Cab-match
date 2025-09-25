@@ -1098,7 +1098,7 @@ const DriverDashboard = ({ user, onLogout }) => {
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm" data-testid="driver-trips-card">
               <CardHeader>
                 <CardTitle className="flex items-center text-lg">
-                  <Route className="w-5 h-5 mr-2 text-gray-600" />
+                  <Navigation className="w-5 h-5 mr-2 text-gray-600" />
                   Recent Trips
                 </CardTitle>
               </CardHeader>
