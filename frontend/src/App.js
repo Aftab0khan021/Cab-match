@@ -16,6 +16,7 @@ import {
   PhoneCall, StarIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Toaster } from './components/ui/sonner';
 import axios from 'axios';
 
 // Leaflet imports
