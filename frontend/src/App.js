@@ -1132,7 +1132,7 @@ const DriverDashboard = ({ user, onLogout }) => {
                         {trip.distance_km && (
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center text-gray-600">
-                              <Route className="w-3 h-3 mr-1" />
+                              <Navigation className="w-3 h-3 mr-1" />
                               {trip.distance_km.toFixed(1)} km
                             </div>
                             {trip.status === 'completed' && (
