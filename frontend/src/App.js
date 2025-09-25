@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback } from './components/ui/avatar';
 import { Separator } from './components/ui/separator';
 import { 
   MapPin, Car, Clock, Phone, User, Navigation, DollarSign, 
-  Star, MessageCircle, Shield, Heart, Route, Zap, 
+  Star, MessageCircle, Shield, Heart, Zap, 
   Navigation2, AlertCircle, Menu, X, RefreshCw,
   PhoneCall, StarIcon
 } from 'lucide-react';
