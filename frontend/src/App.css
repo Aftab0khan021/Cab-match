@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* Reset and base styles */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -13,6 +14,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f8fafc;
+  line-height: 1.6;
 }
 
 .App {
@@ -35,6 +37,22 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Leaflet map styles */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-popup-tip {
+  background: white;
 }
 
 /* Animation utilities */
@@ -68,6 +86,28 @@ body {
   }
 }
 
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Button hover effects */
 button:not(:disabled) {
   transition: all 0.2s ease-in-out;
@@ -83,45 +123,76 @@ button:active:not(:disabled) {
 
 /* Card hover effects */
 .card-hover {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
 }
 
-/* Status indicators */
-.status-online {
-  position: relative;
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.status-online::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background-color: #10b981;
-  border: 2px solid white;
-  border-radius: 50%;
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.status-busy {
-  position: relative;
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Touch-friendly buttons */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Larger tap targets */
+  .mobile-tap-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Improved form inputs for mobile */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    padding: 1rem;
+  }
+  
+  /* Hide elements on mobile */
+  .hidden-mobile {
+    display: none;
+  }
 }
 
-.status-busy::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background-color: #f59e0b;
-  border: 2px solid white;
-  border-radius: 50%;
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  .desktop-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Loading states */
@@ -138,77 +209,311 @@ button:active:not(:disabled) {
   }
 }
 
-/* Map styles */
-.map-container {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.loading-spin {
+  animation: spin 1s linear infinite;
 }
 
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-/* Success states */
-.success-glow {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-}
-
-/* Error states */
-.error-glow {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-}
-
-/* Custom badge styles */
-.badge-gradient {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-/* Responsive utilities */
-@media (max-width: 640px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .text-responsive {
-    font-size: 0.875rem;
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Focus states */
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  ring: 2px;
-  ring-color: #10b981;
-  ring-offset: 2px;
-  border-color: #10b981;
-}
-
-/* Custom form styles */
-.form-floating {
+/* Status indicators */
+.status-indicator {
   position: relative;
 }
 
-.form-floating label {
+.status-indicator::after {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  transition: all 0.2s ease-in-out;
-  pointer-events: none;
-  color: #6b7280;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid white;
+  border-radius: 50%;
 }
 
-.form-floating input:focus + label,
-.form-floating input:not(:placeholder-shown) + label {
-  top: 8px;
-  transform: translateY(0);
-  font-size: 0.75rem;
-  color: #10b981;
+.status-online::after {
+  background-color: #10b981;
+}
+
+.status-busy::after {
+  background-color: #f59e0b;
+}
+
+.status-offline::after {
+  background-color: #6b7280;
+}
+
+/* Interactive elements */
+.interactive {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.interactive:hover {
+  transform: scale(1.02);
+}
+
+.interactive:active {
+  transform: scale(0.98);
+}
+
+/* Focus states for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid #000;
+  }
+  
+  .text-gray-500 {
+    color: #000 !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0f172a;
+    color: #f8fafc;
+  }
+  
+  .card {
+    background-color: #1e293b;
+    border-color: #334155;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break-after {
+    page-break-after: always;
+  }
+}
+
+/* Custom utility classes */
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.shadow-error {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.text-gradient-emerald {
+  background: linear-gradient(135deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-orange {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.backdrop-blur-glass {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive grid helpers */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile navigation enhancements */
+.mobile-nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.mobile-nav-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 16rem;
+  background-color: white;
+  box-shadow: -10px 0 25px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.mobile-nav-panel.open {
+  transform: translateX(0);
+}
+
+/* Enhanced form styles */
+.form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #10b981;
+  ring: 2px;
+  ring-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Trip status colors */
+.status-requested {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.status-assigned {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-ongoing {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.status-completed {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Map controls */
+.map-controls {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.map-control-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.map-control-button:hover {
+  background-color: #f9fafb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Rating stars */
+.rating-star {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.rating-star:hover {
+  transform: scale(1.1);
+}
+
+.rating-star.active {
+  color: #fbbf24;
+}
+
+/* Emergency button */
+.emergency-button {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background-color: #dc2626;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+  z-index: 1000;
+}
+
+/* Pulse animation for notifications */
+.notification-pulse {
+  animation: pulse-notification 2s infinite;
+}
+
+@keyframes pulse-notification {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
