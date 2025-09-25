@@ -809,7 +809,7 @@ const RiderDashboard = ({ user, onLogout }) => {
                         </div>
                         {trip.distance_km && (
                           <div className="flex items-center text-sm text-gray-600">
-                            <Route className="w-3 h-3 mr-1" />
+                            <Navigation className="w-3 h-3 mr-1" />
                             {trip.distance_km.toFixed(1)} km
                           </div>
                         )}
