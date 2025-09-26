@@ -266,7 +266,7 @@ async def register_driver(driver_data: DriverCreate):
     )
 
 @api_router.post("/auth/login", response_model=AuthResponse)
-async def login(payload: LoginRequest = Body(None), phone_q: str = Query(None)):
+async def login(payload: LoginRequest = Body(None), phone_q: str = Query(None ,alias="phone")):
     phone = (payload.phone if payload and payload.phone else phone_q)
     if not phone:
         raise HTTPException(status_code=422, detail="phone is required")
