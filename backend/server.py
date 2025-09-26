@@ -40,12 +40,18 @@ def _parse_origins() -> List[str]:
 
 # Create the main app without a prefix
 app = FastAPI()
+origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_parse_origins(),
+    allow_origins=origins,  # explicit ones (e.g., localhost)
+    allow_origin_regex=os.getenv(
+        "CORS_ORIGIN_REGEX",
+        r"^https:\/\/cab-match-[a-z0-9]+-aftab-pathans-projects-9c06d6e7\.vercel\.app$"
+    ),
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=False
 )
 
 @app.get("/health")
